@@ -37,7 +37,8 @@ void three_interpolate_wrapper_fast(int b, int c, int m, int n,
     float *out = out_tensor.data<float>();
     const int *idx = idx_tensor.data<int>();
 
-    cudaStream_t stream = THCState_getCurrentStream(state);
+    // cudaStream_t stream = THCState_getCurrentStream(state);
+    cudaStream_t stream = at::cuda::getCurrentCUDAStream();
     three_interpolate_kernel_launcher_fast(b, c, m, n, points, idx, weight, out, stream);
 }
 
@@ -53,6 +54,7 @@ void three_interpolate_grad_wrapper_fast(int b, int c, int n, int m,
     float *grad_points = grad_points_tensor.data<float>();
     const int *idx = idx_tensor.data<int>();
 
-    cudaStream_t stream = THCState_getCurrentStream(state);
+    // cudaStream_t stream = THCState_getCurrentStream(state);
+    cudaStream_t stream = at::cuda::getCurrentCUDAStream();
     three_interpolate_grad_kernel_launcher_fast(b, c, n, m, grad_out, idx, weight, grad_points, stream);
 }

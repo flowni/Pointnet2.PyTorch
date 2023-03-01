@@ -32,7 +32,8 @@ int group_points_wrapper_fast(int b, int c, int n, int npoints, int nsample,
     const int *idx = idx_tensor.data<int>();
     float *out = out_tensor.data<float>();
 
-    cudaStream_t stream = THCState_getCurrentStream(state);
+    // cudaStream_t stream = THCState_getCurrentStream(state);
+    cudaStream_t stream = at::cuda::getCurrentCUDAStream();
 
     group_points_kernel_launcher_fast(b, c, n, npoints, nsample, points, idx, out, stream);
     return 1;
