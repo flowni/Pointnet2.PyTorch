@@ -1,6 +1,8 @@
 #include <torch/serialize/tensor.h>
 #include <vector>
-#include <THC/THC.h>
+// #include <THC/THC.h>
+#include <ATen/cuda/CUDAContext.h>
+#include <ATen/cuda/CUDAEvent.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,26 +10,27 @@
 #include <cuda_runtime_api.h>
 #include "interpolate_gpu.h"
 
-extern THCState *state;
+// extern THCState *state;
 
-
-void three_nn_wrapper_fast(int b, int n, int m, at::Tensor unknown_tensor, 
-    at::Tensor known_tensor, at::Tensor dist2_tensor, at::Tensor idx_tensor) {
+void three_nn_wrapper_fast(int b, int n, int m, at::Tensor unknown_tensor,
+                           at::Tensor known_tensor, at::Tensor dist2_tensor, at::Tensor idx_tensor)
+{
     const float *unknown = unknown_tensor.data<float>();
     const float *known = known_tensor.data<float>();
     float *dist2 = dist2_tensor.data<float>();
     int *idx = idx_tensor.data<int>();
 
-    cudaStream_t stream = THCState_getCurrentStream(state);
+    // cudaStream_t stream = THCState_getCurrentStream(state);
+    cudaStream_t stream = at::cuda::getCurrentCUDAStream();
     three_nn_kernel_launcher_fast(b, n, m, unknown, known, dist2, idx, stream);
 }
 
-
 void three_interpolate_wrapper_fast(int b, int c, int m, int n,
-                         at::Tensor points_tensor,
-                         at::Tensor idx_tensor,
-                         at::Tensor weight_tensor,
-                         at::Tensor out_tensor) {
+                                    at::Tensor points_tensor,
+                                    at::Tensor idx_tensor,
+                                    at::Tensor weight_tensor,
+                                    at::Tensor out_tensor)
+{
 
     const float *points = points_tensor.data<float>();
     const float *weight = weight_tensor.data<float>();
@@ -39,10 +42,11 @@ void three_interpolate_wrapper_fast(int b, int c, int m, int n,
 }
 
 void three_interpolate_grad_wrapper_fast(int b, int c, int n, int m,
-                            at::Tensor grad_out_tensor,
-                            at::Tensor idx_tensor,
-                            at::Tensor weight_tensor,
-                            at::Tensor grad_points_tensor) {
+                                         at::Tensor grad_out_tensor,
+                                         at::Tensor idx_tensor,
+                                         at::Tensor weight_tensor,
+                                         at::Tensor grad_points_tensor)
+{
 
     const float *grad_out = grad_out_tensor.data<float>();
     const float *weight = weight_tensor.data<float>();
